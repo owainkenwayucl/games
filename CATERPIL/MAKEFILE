@@ -1,0 +1,10 @@
+CC=gcc
+COPTS=-O3
+
+all: caterpil.exe
+
+caterpil.exe: caterpil.c makefile
+	$(CC) $(COPTS) caterpil.c -o caterpil.exe
+
+clean:
+	del *.exe 
