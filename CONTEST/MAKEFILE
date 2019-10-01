@@ -1,0 +1,17 @@
+CC=gcc
+COPTS=-O3
+
+all: moving.exe conbug.exe contest.exe 
+
+contest.exe: contest.c makefile
+	$(CC) $(COPTS) contest.c -o contest.exe
+
+conbug.exe: conbug.c makefile
+	$(CC) $(COPTS) conbug.c -o conbug.exe
+
+moving.exe: move.c makefile
+	$(CC) $(COPTS) move.c -o moving.exe
+
+
+clean:
+	del *.exe 
