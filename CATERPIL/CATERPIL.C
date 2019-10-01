@@ -1,3 +1,14 @@
+/*
+ * Caterpillar
+ * ===========
+ * 
+ * "Snake"-style game for DOS using conio.h from DJGPP
+ * (c) Dr Owain Kenway
+ *
+ * Released under the MIT license
+ *
+ */
+
 #include <stdio.h>
 #include <conio.h>
 #include <stdbool.h>
@@ -22,34 +33,34 @@ void main(argv) {
   running = true;     // Is the game alive?
   speed = 1;          // Event frequency
   speedc = 0;
-  delay = 200000;
-  taken_i = 0;
+  delay = 200000;     // Loop delay
+  taken_i = 0;        // Time taken 
   taken_d = 0;
-  unit = 4;
-  offset = 6;
-  score = 0;
+  unit = 4;           // Caterpillar Unit length
+  offset = 6;         // Space between play area and score
+  score = 0;          // Score
 
-  headfg = 15;
-  headbg = 0;
-  head = 34;
+  headfg = 15;        // Head FG colour
+  headbg = 0;         // Head BG colour
+  head = 34;          // Head char
 
-  bodyfg = 14;
-  bodybg = 6;
+  bodyfg = 14;        // Body "
+  bodybg = 6;   
   body = 219;
 
-  grassfg = 10;
+  grassfg = 10;       // Grass "
   grassbg = 2;
   grass = 219;
 
-  foodfg = 12;
+  foodfg = 12;        // Food "
   foodbg = 12;
   food = 219;
 
-  length = unit;
+  length = unit;      // Set caterpillar to unit length
 
-  int *field = malloc(w*h*sizeof(int));
-  int *bgfield = malloc(w*h*sizeof(int));
-  int *udf = malloc(w*h*sizeof(int));
+  int *field = malloc(w*h*sizeof(int));    // Playing field
+  int *bgfield = malloc(w*h*sizeof(int));  // Terrain
+  int *udf = malloc(w*h*sizeof(int));      // Update mask
   for (i=0; i<w*h; i++) {
     field[i] = 0;
     bgfield[i] = rand() %3;
@@ -59,6 +70,7 @@ void main(argv) {
 
   clrscr();
 
+  // Set up UI to the right of play area
   textbackground(0);
   textcolor(14);
 
@@ -81,6 +93,7 @@ void main(argv) {
 
   _setcursortype(_NOCURSOR);
 
+  // Pick a random starting direction and position.
   direction = rand() %4;     // 0 = d, 1 = u, 2 = l, 3 = r
 
   x = rand() % w + 1;
@@ -88,6 +101,7 @@ void main(argv) {
 
   field[(x-1) + ((y-1)*w)] = length;
 
+  // Pick a starting location for the food from the remaining locations.
   fri = true;
 
   while (fri) {
@@ -98,8 +112,11 @@ void main(argv) {
     }
   }
 
+  // Main game loop.
   while (running) {
-    //delay_c = delay;
+
+    // Adjust iteration delay based on how long the last loop iteration
+    // took.
     delay_c = delay - taken_i;
     gotoxy(w+offset, 14);
     cprintf("Delay_i (usec): %d ", delay_c);  
@@ -109,11 +126,14 @@ void main(argv) {
     cprintf("Delay_c (usec): %d ", delay_c);  
     usleep(delay_c);  // Timing
 
+     // Start timing for this iteration.
     loop_b = clock();
 
+    // Event check.
     speedc +=1;
 
-    if ((speedc % speed) == 0) {   // Fire events
+    if ((speedc % speed) == 0) {   // Fire event
+      // Get and process keyboard input.
       if (kbhit()) {
         t = getch();
 
@@ -140,10 +160,13 @@ void main(argv) {
         } else if (t == 'd') {
           if (direction !=2) direction = 3;
         }  
+        // Clear keyboard buffer.
         while (kbhit())  {
           junk = getch();
         }
       }
+
+      // Cause time to happen by subtracting 1 from all points > 0
       for (i = 0; i<w*h; i++) {
         if (field[i] > 0) {
           field[i] = field[i] - 1;
@@ -152,6 +175,7 @@ void main(argv) {
 
       }
 
+      // Work out new head location based on direction we are moving in.
       switch (direction) {
         case 0:
           y = y + 1;
@@ -178,21 +202,25 @@ void main(argv) {
           }
           break;
       }
+
+      // Work out if new head location contains food.
       if (field[(((y-1) * w) + (x - 1))] < 0) {
-        length += unit;
-        score += 1000;
-        textbackground(0);
+        length += unit;           // Increase snake length
+        score += 1000;            // Increase scrore
+        textbackground(0);        // Write new score
         textcolor(3);
         gotoxy(w+offset, 10);
         cprintf("Score: %d", score);  
+
+        // Update caterpillar values
         for (i = 0; i<w*h; i++) {
           if (field[i] > 0) {
             field[i] = field[i] + unit;
-            //udf[i] = 1;
+            //udf[i] = 1;  // not necessary as we did this prev step
           }
         }
-        field[((y-1) * w) + (x-1)] = length;
-        udf[((y-1) * w) + (x-1)] = 1;
+
+        // Find new location for food.
         fri = true;   
         while (fri) {
           loc = rand() % (w*h);
@@ -202,13 +230,18 @@ void main(argv) {
             fri = false;
           }
         }
+
+      // Collision detection vs caterpillaer
       } else if (field[(((y-1) * w) + (x - 1))] > 0) {
         running = false;
 
       }
+
+      // Place head.
       field[((y-1) * w) + (x-1)] = length;
       udf[((y-1) * w) + (x-1)] = 1;
 
+      // Draw playing field.
       for (i = 0; i<w; i++) {
         for (j = 0; j<h; j++) {
           junk = field[(j*w) + i]; 
@@ -237,6 +270,8 @@ void main(argv) {
         }
       }
     }
+
+    // Loop timing.
     loop_e = clock();
     taken_d = ((double)(loop_e - loop_b))/CLOCKS_PER_SEC;
     taken_i = (int)(taken_d * 1000000);
@@ -245,6 +280,8 @@ void main(argv) {
     textcolor(4);
     cprintf("Loop (usec): %d     ", taken_i);  
   }    
+
+  // Tidy up.
   gotoxy(x,y);
   textcolor(7);
   textbackground(0);
