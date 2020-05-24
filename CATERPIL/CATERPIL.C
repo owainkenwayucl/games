@@ -136,30 +136,40 @@ void main(argv) {
       // Get and process keyboard input.
       if (kbhit()) {
         t = getch();
-
-        if (t == 'q') {
-          running = false;
-          gotoxy(x,y);
-          textcolor(7);
-          textbackground(0);
-          putch(head); 
-        } else if (t == 'u') {
-          if (direction !=0) direction = 1;
-        } else if (t == 'j') {
-          if (direction !=1) direction = 0;
-        } else if (t == 'h') {
-          if (direction !=3) direction = 2;
-        } else if (t == 'k') {
-          if (direction !=2) direction = 3;
-        } else if (t == 'w') {
-          if (direction !=0) direction = 1;
-        } else if (t == 's') {
-          if (direction !=1) direction = 0;
-        } else if (t == 'a') {
-          if (direction !=3) direction = 2;
-        } else if (t == 'd') {
-          if (direction !=2) direction = 3;
+        switch (t) {
+          case 'q':
+            running = false;
+            gotoxy(x,y);
+            textcolor(7);
+            textbackground(0);
+            putch(head);
+            break; 
+          case 'u':
+            if (direction !=0) direction = 1;
+            break;
+          case 'j':
+            if (direction !=1) direction = 0;
+            break;
+          case 'h':
+            if (direction !=3) direction = 2;
+            break;
+          case 'k':
+            if (direction !=2) direction = 3;
+            break;
+          case 'w':
+            if (direction !=0) direction = 1;
+            break;
+          case 's':
+            if (direction !=1) direction = 0;
+            break;
+          case 'a':
+            if (direction !=3) direction = 2;
+            break;
+          case 'd':
+            if (direction !=2) direction = 3;
+            break;
         }  
+
         // Clear keyboard buffer.
         while (kbhit())  {
           junk = getch();
@@ -172,7 +182,6 @@ void main(argv) {
           field[i] = field[i] - 1;
           udf[i] = 1;
         }
-
       }
 
       // Work out new head location based on direction we are moving in.
@@ -216,7 +225,6 @@ void main(argv) {
         for (i = 0; i<w*h; i++) {
           if (field[i] > 0) {
             field[i] = field[i] + unit;
-            //udf[i] = 1;  // not necessary as we did this prev step
           }
         }
 
@@ -231,10 +239,9 @@ void main(argv) {
           }
         }
 
-      // Collision detection vs caterpillaer
+      // Collision detection vs caterpillar
       } else if (field[(((y-1) * w) + (x - 1))] > 0) {
         running = false;
-
       }
 
       // Place head.
@@ -266,7 +273,6 @@ void main(argv) {
             }
             udf[(j*w) + i] = 0;
           }
-
         }
       }
     }
